@@ -1,13 +1,17 @@
 import pandas as pd
 import glob
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from tqdm import tqdm
 import argparse
+import time
+import random
 
-from scraper.bbc_scraper import BBCScraper
 from selenium.webdriver.chrome.service import Service
+from waybackpy import WaybackMachineCDXServerAPI
+
 from general import load_json, save_json, return_article_dataset, get_article_info
+from scraper.bbc_scraper import BBCScraper
 
 
 def scrape_livefeed(live_feeds: json, base_url: str):
@@ -198,6 +202,61 @@ def scrape_search(search_term: str):
     search_name = search_term.lower().replace(" ", "_")
 
     save_json('../data/metadata/search/' + search_name + ".json", search_data, append=False)
+
+
+def scrape_wayback(file: str, fill_existing: bool = False):
+
+    articles = pd.read_csv(file)
+    existing_article = pd.read_csv('./all_wybm.csv')
+    articles = articles[~articles['url'].isin(existing_article['base_url'].unique())]
+
+    if fill_existing:
+        tqdm.pandas()
+        articles.fillna('', inplace=True)
+        articles = articles.progress_apply(get_article_info, wybm=True, axis=1)
+        return articles
+
+    processed_articles = []
+    articles['date'] = pd.to_datetime(articles['date'])
+
+    for url, date in zip(articles.url, articles.date):
+        try:
+            processed_articles.append(scrape_wayback_url(url, base_time=date))
+        except:
+            pass
+
+    return pd.concat(processed_articles)
+
+
+def scrape_wayback_url(url: str, base_time: datetime, range_hours: int = 24):
+    """
+
+    :param range_hours:
+    :param base_time:
+    :param url:
+    :return:
+    """
+
+    base_time_end = base_time + timedelta(hours=range_hours)
+
+    user_agent = "Mozilla/5.0 (Windows NT 5.1; rv:40.0) Gecko/20100101 Firefox/40.0"
+    cdx = WaybackMachineCDXServerAPI(url, user_agent, start_timestamp=base_time.strftime('%Y%m%d%H%M%S'),
+                                     end_timestamp=base_time_end.strftime('%Y%m%d%H%M%S'))
+    snapshots = [item for item in cdx.snapshots()]
+    df = pd.DataFrame(
+        {
+            'url': [item.archive_url for item in snapshots],
+            'snapshot_date': [datetime.strptime(item.timestamp, '%Y%m%d%H%M%S') for item in snapshots],
+        }
+    )
+
+    df['date'] = base_time
+    df['base_url'] = url
+
+    # collect full article info
+    tqdm.pandas()
+    df = df.progress_apply(get_article_info, wybm=True, axis=1)
+    return df
 
 
 def process_searches(directory: str = '../data/metadata/search/'):

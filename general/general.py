@@ -65,8 +65,11 @@ def return_article_dataset(directory: str):
     return titles, links, topics
 
 
-def get_article_info(row):
+def get_article_info(row, wybm=False):
     url = row['url']
+
+    if row['date'] != '':
+        return row
 
     row['date'] = ''
     row['title_from_page'] = ''
@@ -76,7 +79,7 @@ def get_article_info(row):
         return row
 
     try:
-        article = BBCArticle(url)
+        article = BBCArticle(url, wybm=wybm)
     except (AttributeError, TypeError, requests.exceptions.ConnectionError):
         print("Failed to process article {}.".format(url))
         return row
