@@ -1,0 +1,5 @@
+article_id,article_title,article_date,sentence,category,voice
+3300,UN General Assembly demands Israel ends occupation of Palestinian territories,2024-09-19," It  comes  after  almost  a  year  of  war  in  Gaza,  which  began  when  Hamas  gunmen  attacked  Israel  on  7  October,  killing  about  1,200  people  and  taking  251  others  as  hostages. ",israel,ACTIVE
+3300,UN General Assembly demands Israel ends occupation of Palestinian territories,2024-09-19," More  than  41,110  people  have  been  killed  in  Gaza  since  then,  according  to  the  territory's  Hamas-run  health  ministry. ",palestine,PASSIVE
+3300,UN General Assembly demands Israel ends occupation of Palestinian territories,2024-09-19," There  has  also  been  a  spike  in  violence  in  the  West  Bank  over  the  same  period,  in  which  the  UN  says  more  than  680  Palestinians  and  22  Israelis  have  been  killed. ",both,PASSIVE
+3300,UN General Assembly demands Israel ends occupation of Palestinian territories,2024-09-19, Another  10  Israelis  have  been  killed  in  attacks  by  Palestinians  in  Israel. ,israel,PASSIVE
